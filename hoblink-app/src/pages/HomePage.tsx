@@ -10,10 +10,10 @@ const HomePage: React.FC = () => {
       {/* Header */}
       <header className="sticky top-0 z-50 bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700 transition-colors duration-200 backdrop-blur-sm bg-white/95 dark:bg-gray-800/95">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-20">
+          <div className="flex justify-between items-center h-24">
             {/* Logo */}
             <div className="flex items-center">
-              <HobLinkLogo variant="horizontal" size="lg" />
+              <HobLinkLogo variant="horizontal" size="xl" />
             </div>
 
             {/* Navigation */}
