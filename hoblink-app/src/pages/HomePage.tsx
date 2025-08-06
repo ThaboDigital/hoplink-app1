@@ -1,18 +1,16 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { useTheme } from '../contexts/ThemeContext';
 import HobLinkLogo from '../components/HobLinkLogo';
 import ThemeToggle from '../components/ThemeToggle';
 
 const HomePage: React.FC = () => {
-  const { isDark } = useTheme();
 
   return (
     <div className="min-h-screen bg-white dark:bg-gray-900 text-gray-900 dark:text-white transition-colors duration-200">
       {/* Header */}
-      <header className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700 transition-colors duration-200">
+      <header className="sticky top-0 z-50 bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700 transition-colors duration-200 backdrop-blur-sm bg-white/95 dark:bg-gray-800/95">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
+          <div className="flex justify-between items-center h-20">
             {/* Logo */}
             <div className="flex items-center">
               <HobLinkLogo variant="horizontal" size="lg" />
@@ -190,7 +188,7 @@ const HomePage: React.FC = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid md:grid-cols-4 gap-8">
             <div>
-              <HobLinkLogo variant="vertical" size="sm" className="mb-4" />
+              <HobLinkLogo variant="vertical" size="md" className="mb-4" />
               <p className="text-gray-400 dark:text-gray-500">
                 Safe, Simple Rides — Wherever You Are.
               </p>

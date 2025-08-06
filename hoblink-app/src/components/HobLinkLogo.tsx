@@ -18,10 +18,10 @@ const HobLinkLogo: React.FC<HobLinkLogoProps> = ({
 
   // Size classes for different logo sizes
   const sizeClasses = {
-    sm: variant === 'horizontal' ? 'h-6' : 'h-8',
-    md: variant === 'horizontal' ? 'h-8' : 'h-12',
-    lg: variant === 'horizontal' ? 'h-10' : 'h-16',
-    xl: variant === 'horizontal' ? 'h-12' : 'h-20'
+    sm: variant === 'horizontal' ? 'h-10' : 'h-12',
+    md: variant === 'horizontal' ? 'h-12' : 'h-16',
+    lg: variant === 'horizontal' ? 'h-16' : 'h-20',
+    xl: variant === 'horizontal' ? 'h-20' : 'h-24'
   };
 
   // Get the appropriate logo URL based on theme and variant

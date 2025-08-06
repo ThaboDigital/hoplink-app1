@@ -93,7 +93,7 @@ const LoginPage: React.FC = () => {
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         {/* Logo */}
         <div className="flex justify-center">
-          <HobLinkLogo variant="vertical" size="lg" />
+          <HobLinkLogo variant="vertical" size="xl" />
         </div>
         <h2 className="mt-6 text-center text-3xl font-bold text-gray-900 dark:text-white">
           Welcome back
