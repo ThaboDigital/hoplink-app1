@@ -3,7 +3,7 @@ import { useTheme } from '../contexts/ThemeContext';
 
 interface HobLinkLogoProps {
   variant?: 'horizontal' | 'vertical';
-  size?: 'sm' | 'md' | 'lg' | 'xl';
+  size?: 'sm' | 'md' | 'lg' | 'xl' | '2xl';
   className?: string;
   alt?: string;
 }
@@ -21,7 +21,8 @@ const HobLinkLogo: React.FC<HobLinkLogoProps> = ({
     sm: variant === 'horizontal' ? 'h-10' : 'h-12',
     md: variant === 'horizontal' ? 'h-12' : 'h-16',
     lg: variant === 'horizontal' ? 'h-16' : 'h-20',
-    xl: variant === 'horizontal' ? 'h-20' : 'h-24'
+    xl: variant === 'horizontal' ? 'h-20' : 'h-24',
+    '2xl': variant === 'horizontal' ? 'h-24' : 'h-32'
   };
 
   // Get the appropriate logo URL based on theme and variant

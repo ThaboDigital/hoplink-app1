@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
-import authService, { AuthUser } from '../services/auth';
+import supabaseAuthService, { AuthUser } from '../services/authSupabaseOnly';
 
 interface AuthContextType {
   currentUser: AuthUser | null;
@@ -12,7 +12,7 @@ interface AuthContextType {
       firstName: string;
       lastName: string;
       phone: string;
-      userType: 'rider' | 'driver';
+      userType: 'user' | 'driver';
     }
   ) => Promise<AuthUser>;
   signInWithGoogle: () => Promise<AuthUser>;
@@ -48,13 +48,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   useEffect(() => {
     // Listen for auth state changes
-    const unsubscribe = authService.onAuthStateChange((user) => {
+    const unsubscribe = supabaseAuthService.onAuthStateChange((user) => {
       setCurrentUser(user);
       setLoading(false);
     });
 
     // Set initial user if already authenticated
-    const user = authService.getCurrentUser();
+    const user = supabaseAuthService.getCurrentUser();
     if (user) {
       setCurrentUser(user);
     }
@@ -66,7 +66,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const signIn = async (email: string, password: string): Promise<AuthUser> => {
     setLoading(true);
     try {
-      const user = await authService.signIn(email, password);
+      const user = await supabaseAuthService.signIn(email, password);
       setCurrentUser(user);
       return user;
     } finally {
@@ -81,12 +81,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       firstName: string;
       lastName: string;
       phone: string;
-      userType: 'rider' | 'driver';
+      userType: 'user' | 'driver';
     }
   ): Promise<AuthUser> => {
     setLoading(true);
     try {
-      const user = await authService.signUp(email, password, userData);
+      const user = await supabaseAuthService.signUp(email, password, userData);
       setCurrentUser(user);
       return user;
     } finally {
@@ -97,7 +97,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const signInWithGoogle = async (): Promise<AuthUser> => {
     setLoading(true);
     try {
-      const user = await authService.signInWithGoogle();
+      const user = await supabaseAuthService.signInWithGoogle();
       setCurrentUser(user);
       return user;
     } finally {
@@ -108,7 +108,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const signInWithFacebook = async (): Promise<AuthUser> => {
     setLoading(true);
     try {
-      const user = await authService.signInWithFacebook();
+      const user = await supabaseAuthService.signInWithFacebook();
       setCurrentUser(user);
       return user;
     } finally {
@@ -119,7 +119,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const signOut = async (): Promise<void> => {
     setLoading(true);
     try {
-      await authService.signOut();
+      await supabaseAuthService.signOut();
       setCurrentUser(null);
     } finally {
       setLoading(false);
@@ -127,7 +127,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   const resetPassword = async (email: string): Promise<void> => {
-    return authService.resetPassword(email);
+    return supabaseAuthService.resetPassword(email);
   };
 
   const updateUserProfile = async (updates: {
@@ -135,15 +135,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     photoURL?: string;
     phone?: string;
   }): Promise<void> => {
-    return authService.updateUserProfile(updates);
+    return supabaseAuthService.updateUserProfile(updates);
   };
 
   const isAuthenticated = (): boolean => {
-    return authService.isAuthenticated();
+    return supabaseAuthService.isAuthenticated();
   };
 
-  const hasRole = (role: 'rider' | 'driver' | 'admin'): boolean => {
-    return authService.hasRole(role);
+  const hasRole = (role: 'user' | 'driver' | 'admin'): boolean => {
+    return supabaseAuthService.hasRole(role);
   };
 
   const value: AuthContextType = {

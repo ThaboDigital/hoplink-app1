@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import HobLinkLogo from '../components/HobLinkLogo';
-import LoadingSpinner from '../components/LoadingSpinner';
+import ThemeToggle from '../components/ThemeToggle';
 
 const LoginPage: React.FC = () => {
   const [email, setEmail] = useState('');

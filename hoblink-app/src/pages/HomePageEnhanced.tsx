@@ -16,40 +16,24 @@ const HomePage: React.FC = () => {
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-emerald-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 transition-colors duration-300">
       {/* Animated Background Elements */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        {/* Moving Car Animation - Multiple cars */}
+        {/* Moving Car Animation */}
         <div className="absolute top-1/2 left-0 transform -translate-y-1/2">
-          <div className="opacity-10 dark:opacity-5 moving-car">
-            <div className="w-16 h-8 bg-gradient-to-r from-green-400 to-emerald-500 rounded-lg shadow-lg relative">
-              {/* Car details */}
+          <div className="animate-pulse opacity-10 dark:opacity-5">
+            <div className="w-16 h-8 bg-gradient-to-r from-green-400 to-emerald-500 rounded-lg shadow-lg animate-bounce" 
+                 style={{ 
+                   animation: 'moveRight 15s linear infinite, bounce 2s ease-in-out infinite',
+                   animationDelay: '0s, 1s' 
+                 }}>
+              {/* Car shape */}
               <div className="absolute top-1 left-2 w-3 h-3 bg-white rounded-full opacity-70"></div>
               <div className="absolute top-1 right-2 w-3 h-3 bg-white rounded-full opacity-70"></div>
-              <div className="absolute top-0 left-4 w-8 h-2 bg-blue-200 rounded opacity-60"></div>
-              {/* Car emoji for better mobile representation */}
-              <div className="absolute inset-0 flex items-center justify-center text-lg">🚗</div>
             </div>
           </div>
         </div>
-
-        {/* Second car - different timing */}
-        <div className="absolute top-3/5 left-0 transform -translate-y-1/2" style={{ animationDelay: '7s' }}>
-          <div className="opacity-8 dark:opacity-4 moving-car">
-            <div className="w-12 h-6 bg-gradient-to-r from-blue-400 to-cyan-500 rounded-lg shadow-lg relative">
-              <div className="absolute inset-0 flex items-center justify-center text-sm">🚕</div>
-            </div>
-          </div>
-        </div>
-
-        {/* Road/path indicator */}
-        <div className="absolute bottom-1/3 left-0 w-full h-1 bg-gradient-to-r from-transparent via-gray-300 to-transparent opacity-20 dark:via-gray-600"></div>
         
-        {/* Floating mobility icons */}
-        <div className="absolute top-1/4 right-1/4 w-8 h-8 text-green-300 opacity-20 animate-ping">📍</div>
-        <div className="absolute bottom-1/4 left-1/4 w-6 h-6 text-emerald-400 opacity-30 animate-pulse">🗺️</div>
-        <div className="absolute top-1/3 left-2/3 w-4 h-4 text-blue-400 opacity-25 animate-bounce">🛣️</div>
-        
-        {/* Abstract geometric shapes */}
-        <div className="absolute top-1/5 right-1/3 w-4 h-4 bg-green-200 rounded-full opacity-10 animate-pulse"></div>
-        <div className="absolute bottom-2/5 right-1/5 w-2 h-8 bg-emerald-300 rounded opacity-15 animate-ping"></div>
+        {/* Floating elements */}
+        <div className="absolute top-1/4 right-1/4 w-2 h-2 bg-green-300 rounded-full opacity-20 animate-ping"></div>
+        <div className="absolute bottom-1/3 left-1/3 w-1 h-1 bg-emerald-400 rounded-full opacity-30 animate-pulse"></div>
       </div>
 
       {/* Header with enlarged logo */}
@@ -262,40 +246,12 @@ const HomePage: React.FC = () => {
       {/* Footer */}
       <footer className="bg-gray-900 dark:bg-black text-white py-12 px-4">
         <div className="container mx-auto max-w-6xl">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-            <div className="md:col-span-2">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div>
               <HobLinkLogo variant="horizontal" size="lg" />
-              <p className="mt-4 text-gray-400 mb-4">
+              <p className="mt-4 text-gray-400">
                 Safe, Simple Rides — Wherever You Are.
               </p>
-              
-              {/* Social Media Links */}
-              <div className="flex space-x-4">
-                <a 
-                  href="https://facebook.com/hoblinksa" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="w-10 h-10 bg-blue-600 hover:bg-blue-700 rounded-full flex items-center justify-center transition-colors duration-300 group"
-                >
-                  <span className="text-white text-lg group-hover:scale-110 transition-transform">📘</span>
-                </a>
-                <a 
-                  href="https://instagram.com/hoblinksa" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 rounded-full flex items-center justify-center transition-all duration-300 group"
-                >
-                  <span className="text-white text-lg group-hover:scale-110 transition-transform">📷</span>
-                </a>
-                <a 
-                  href="https://x.com/hoblinksa" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="w-10 h-10 bg-black hover:bg-gray-800 border border-gray-600 rounded-full flex items-center justify-center transition-colors duration-300 group"
-                >
-                  <span className="text-white text-lg group-hover:scale-110 transition-transform">𝕏</span>
-                </a>
-              </div>
             </div>
             
             <div>
@@ -317,18 +273,13 @@ const HomePage: React.FC = () => {
           </div>
           
           <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
-            <p className="mb-2">&copy; 2024 HobLink. All rights reserved.</p>
-            <p className="text-sm">
-              <span className="text-green-400 font-semibold">HobLink</span> by{' '}
-              <span className="text-blue-400 font-semibold">Thabo Digital</span>
-              {' '} • Built with ❤️ for rural South Africa
-            </p>
+            <p>&copy; 2024 HobLink. All rights reserved. Built with ❤️ for rural South Africa.</p>
           </div>
         </div>
       </footer>
 
       {/* Custom CSS for animations */}
-      <style>{`
+      <style jsx>{`
         @keyframes moveRight {
           0% {
             transform: translateX(-100px) translateY(-50%);
@@ -336,10 +287,6 @@ const HomePage: React.FC = () => {
           100% {
             transform: translateX(calc(100vw + 100px)) translateY(-50%);
           }
-        }
-        .moving-car {
-          animation: moveRight 15s linear infinite, bounce 2s ease-in-out infinite;
-          animation-delay: 0s, 1s;
         }
       `}</style>
     </div>
