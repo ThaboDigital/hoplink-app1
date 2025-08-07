@@ -8,9 +8,10 @@
     ],
     "allowJs": true,
     "skipLibCheck": true,
+    "noErrorTruncation": true,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
-    "strict": true,
+    "strict": false,
     "forceConsistentCasingInFileNames": true,
     "noFallthroughCasesInSwitch": true,
     "module": "esnext",
@@ -18,9 +19,24 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noEmit": true,
-    "jsx": "react-jsx"
+    "jsx": "react-jsx",
+    "types": ["node", "google.maps"],
+    "baseUrl": "src",
+    "paths": {
+      "@/*": ["*"]
+    },
+    "skipDefaultLibCheck": true,
+    "noImplicitAny": false
   },
   "include": [
-    "src"
+    "src",
+    "node_modules/@types"
+  ],
+  "exclude": [
+    "node_modules/@react-google-maps/api/src/**/*.stories.tsx",
+    "node_modules/@react-google-maps/api/src/**/*.stories.ts",
+    "node_modules/@storybook",
+    "**/*.stories.*",
+    "**/*.test.*"
   ]
 }

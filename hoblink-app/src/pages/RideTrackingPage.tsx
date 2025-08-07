@@ -1,230 +1,193 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
+import { DatabaseService, Ride } from '../services/database';
+import { GoogleMap, LoadScript, Marker, DirectionsRenderer } from '@react-google-maps/api';
 
 const RideTrackingPage: React.FC = () => {
   const { rideId } = useParams<{ rideId: string }>();
-  const [rideStatus, setRideStatus] = useState('driver_assigned');
-  const [estimatedArrival, setEstimatedArrival] = useState(8);
+  const { currentUser } = useAuth();
+  const [ride, setRide] = useState<Ride | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [directions, setDirections] = useState<google.maps.DirectionsResult | null>(null);
+  const [mapLoaded, setMapLoaded] = useState(false);
+  const [driverLocation, setDriverLocation] = useState<{ lat: number; lng: number } | null>(null);
 
-  // Mock ride data
-  const rideData = {
-    id: rideId,
-    pickup: 'Tzaneen CBD, Limpopo',
-    dropoff: 'Polokwane Airport, Limpopo',
-    fare: 245,
-    driver: {
-      name: 'Sipho Maluleke',
-      rating: 4.8,
-      vehicle: 'Toyota Corolla',
-      licensePlate: 'LP 123 GP',
-      phone: '+27 82 123 4567'
-    }
+  const mapContainerStyle = {
+    width: '100%',
+    height: '400px'
   };
 
-  const statusSteps = [
-    { key: 'booked', label: 'Ride Booked', completed: true },
-    { key: 'driver_assigned', label: 'Driver Assigned', completed: true },
-    { key: 'driver_arriving', label: 'Driver Arriving', completed: rideStatus !== 'driver_assigned' },
-    { key: 'in_progress', label: 'Ride in Progress', completed: ['in_progress', 'completed'].includes(rideStatus) },
-    { key: 'completed', label: 'Ride Completed', completed: rideStatus === 'completed' }
-  ];
+  const center = {
+    lat: -26.2041, // Johannesburg coordinates
+    lng: 28.0473
+  };
 
   useEffect(() => {
-    // Simulate ride progress
-    const interval = setInterval(() => {
-      setEstimatedArrival(prev => Math.max(0, prev - 1));
-    }, 10000); // Update every 10 seconds
+    const fetchRide = async () => {
+      if (!rideId || !currentUser) return;
 
-    return () => clearInterval(interval);
-  }, []);
+      try {
+        const rideData = await DatabaseService.getRide(rideId);
+        setRide(rideData);
 
-  const cancelRide = () => {
-    // TODO: Implement ride cancellation
-    console.log('Cancelling ride:', rideId);
-  };
+        // Subscribe to driver location updates
+        if (rideData.driver_id) {
+          const subscription = DatabaseService.subscribeToDriverLocation(rideData.driver_id, (location: { lat: number; lng: number }) => {
+            setDriverLocation(location);
+          });
 
-  const callDriver = () => {
-    window.location.href = `tel:${rideData.driver.phone}`;
-  };
+          return () => subscription.unsubscribe();
+        }
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to fetch ride details');
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const shareLocation = () => {
-    if (navigator.share) {
-      navigator.share({
-        title: 'My HobLink Ride',
-        text: `I'm taking a HobLink ride. Track me here:`,
-        url: window.location.href
-      });
+    fetchRide();
+  }, [rideId, currentUser]);
+
+  useEffect(() => {
+    if (ride?.pickup_lat && ride?.pickup_lng && ride?.dropoff_lat && ride?.dropoff_lng && mapLoaded) {
+      const directionsService = new google.maps.DirectionsService();
+      directionsService.route(
+        {
+          origin: { lat: ride.pickup_lat, lng: ride.pickup_lng },
+          destination: { lat: ride.dropoff_lat, lng: ride.dropoff_lng },
+          travelMode: google.maps.TravelMode.DRIVING,
+        },
+        (result, status) => {
+          if (status === 'OK' && result) {
+            setDirections(result);
+          }
+        }
+      );
     }
-  };
+  }, [ride?.pickup_lat, ride?.pickup_lng, ride?.dropoff_lat, ride?.dropoff_lng, mapLoaded]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-hoblink-accent"></div>
+      </div>
+    );
+  }
+
+  if (error || !ride) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center p-4">
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-8 max-w-md w-full text-center">
+          <div className="w-16 h-16 bg-red-100 dark:bg-red-900 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg className="w-8 h-8 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Error</h2>
+          <p className="text-gray-600 dark:text-gray-300">{error || 'Ride not found'}</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <header className="bg-white shadow-sm border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <Link to="/" className="flex items-center">
-              <img 
-                src="https://i.postimg.cc/7GSdKBWs/Hob-Link-Light-Mode-Logo-Vertical.png" 
-                alt="HobLink" 
-                className="h-8 w-auto"
-              />
-            </Link>
-            <h1 className="text-lg font-semibold text-gray-900">Track Ride</h1>
-            <div></div>
+          <div className="py-4">
+            <h1 className="text-lg font-semibold text-gray-900">Track Your Ride</h1>
           </div>
         </div>
       </header>
 
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Status Banner */}
-        <div className="bg-hoblink-accent text-white rounded-lg p-6 mb-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h2 className="text-xl font-semibold">Your driver is on the way!</h2>
-              <p className="text-green-100 mt-1">
-                Estimated arrival: {estimatedArrival} minutes
-              </p>
-            </div>
-            <div className="text-right">
-              <div className="text-2xl font-bold">{estimatedArrival}</div>
-              <div className="text-sm text-green-100">minutes</div>
-            </div>
-          </div>
-        </div>
-
-        <div className="grid lg:grid-cols-2 gap-6">
-          {/* Ride Progress */}
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Ride Progress</h3>
-            
-            <div className="space-y-4">
-              {statusSteps.map((step, index) => (
-                <div key={step.key} className="flex items-center">
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                    step.completed ? 'bg-hoblink-accent text-white' : 'bg-gray-200 text-gray-400'
-                  }`}>
-                    {step.completed ? '✓' : index + 1}
-                  </div>
-                  <div className="ml-4">
-                    <p className={`font-medium ${step.completed ? 'text-gray-900' : 'text-gray-400'}`}>
-                      {step.label}
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {/* Trip Details */}
-            <div className="mt-6 pt-6 border-t border-gray-200">
-              <h4 className="font-medium text-gray-900 mb-3">Trip Details</h4>
-              <div className="space-y-2 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-gray-600">From:</span>
-                  <span className="font-medium">{rideData.pickup}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">To:</span>
-                  <span className="font-medium">{rideData.dropoff}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Fare:</span>
-                  <span className="font-medium text-hoblink-accent">R {rideData.fare}</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Driver Information */}
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Your Driver</h3>
-            
-            <div className="flex items-center mb-4">
-              <div className="w-16 h-16 bg-gray-300 rounded-full flex items-center justify-center">
-                <span className="text-xl font-semibold text-gray-600">
-                  {rideData.driver.name.split(' ').map(n => n[0]).join('')}
-                </span>
-              </div>
-              <div className="ml-4">
-                <h4 className="font-semibold text-gray-900">{rideData.driver.name}</h4>
-                <div className="flex items-center">
-                  <span className="text-yellow-400">★</span>
-                  <span className="ml-1 text-sm text-gray-600">{rideData.driver.rating}</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="space-y-3 mb-6">
-              <div className="flex items-center justify-between">
-                <span className="text-gray-600">Vehicle:</span>
-                <span className="font-medium">{rideData.driver.vehicle}</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-gray-600">License Plate:</span>
-                <span className="font-medium">{rideData.driver.licensePlate}</span>
-              </div>
-            </div>
-
-            {/* Action Buttons */}
-            <div className="grid grid-cols-2 gap-3">
-              <button
-                onClick={callDriver}
-                className="flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="bg-white rounded-lg shadow">
+          {/* Map */}
+          <div className="p-4">
+            <LoadScript
+              googleMapsApiKey={process.env.REACT_APP_GOOGLE_MAPS_API_KEY || ''}
+              onLoad={() => setMapLoaded(true)}
+            >
+              <GoogleMap
+                mapContainerStyle={mapContainerStyle}
+                center={center}
+                zoom={12}
               >
-                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-                </svg>
-                Call
-              </button>
-              <button
-                onClick={shareLocation}
-                className="flex items-center justify-center px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
-              >
-                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z" />
-                </svg>
-                Share
-              </button>
-            </div>
-          </div>
-        </div>
+                {/* Pickup Marker */}
+                {ride.pickup_lat && ride.pickup_lng && (
+                  <Marker
+                    position={{ lat: ride.pickup_lat, lng: ride.pickup_lng }}
+                    label="P"
+                  />
+                )}
 
-        {/* Map Placeholder */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mt-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Live Tracking</h3>
-          <div className="w-full h-64 bg-gray-200 rounded-lg flex items-center justify-center">
-            <div className="text-center text-gray-500">
-              <svg className="w-16 h-16 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-              </svg>
-              <p>Real-time map tracking</p>
-              <p className="text-sm mt-1">Google Maps integration</p>
-            </div>
-          </div>
-        </div>
+                {/* Dropoff Marker */}
+                {ride.dropoff_lat && ride.dropoff_lng && (
+                  <Marker
+                    position={{ lat: ride.dropoff_lat, lng: ride.dropoff_lng }}
+                    label="D"
+                  />
+                )}
 
-        {/* Emergency Actions */}
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4 mt-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h4 className="font-medium text-red-800">Need Help?</h4>
-              <p className="text-sm text-red-700">Emergency support available 24/7</p>
-            </div>
-            <div className="flex space-x-3">
-              <button className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors">
-                Emergency
-              </button>
-              <button 
-                onClick={cancelRide}
-                className="border border-red-600 text-red-600 px-4 py-2 rounded-lg hover:bg-red-50 transition-colors"
-              >
-                Cancel Ride
-              </button>
+                {/* Driver Marker */}
+                {driverLocation && (
+                  <Marker
+                    position={driverLocation}
+                    icon={{
+                      path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW,
+                      scale: 6,
+                      fillColor: '#22C55E',
+                      fillOpacity: 1,
+                      strokeWeight: 2,
+                      strokeColor: '#ffffff',
+                      rotation: 0
+                    }}
+                  />
+                )}
+
+                {/* Route */}
+                {directions && (
+                  <DirectionsRenderer
+                    directions={directions}
+                    options={{
+                      suppressMarkers: true,
+                      polylineOptions: {
+                        strokeColor: '#22C55E',
+                        strokeWeight: 5
+                      }
+                    }}
+                  />
+                )}
+              </GoogleMap>
+            </LoadScript>
+          </div>
+
+          {/* Ride Details */}
+          <div className="border-t border-gray-200 p-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <h3 className="text-sm font-medium text-gray-500">Pickup</h3>
+                <p className="mt-1 text-sm text-gray-900">{ride.pickup_address}</p>
+              </div>
+              <div>
+                <h3 className="text-sm font-medium text-gray-500">Dropoff</h3>
+                <p className="mt-1 text-sm text-gray-900">{ride.dropoff_address}</p>
+              </div>
+              <div>
+                <h3 className="text-sm font-medium text-gray-500">Status</h3>
+                <p className="mt-1 text-sm text-gray-900">{ride.status}</p>
+              </div>
+              <div>
+                <h3 className="text-sm font-medium text-gray-500">Fare</h3>
+                <p className="mt-1 text-sm text-gray-900">R {ride.fare}</p>
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      </main>
     </div>
   );
 };

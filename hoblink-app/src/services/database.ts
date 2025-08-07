@@ -6,7 +6,7 @@ export interface User {
   email: string;
   full_name?: string;
   phone?: string;
-  role: 'user' | 'driver' | 'admin';
+  role: 'rider' | 'driver' | 'admin';
   created_at: string;
   updated_at: string;
 }
@@ -292,5 +292,28 @@ export class DatabaseService {
     
     if (error) throw error;
     return data;
+  }
+
+  // Ride Management
+  static async getRide(rideId: string): Promise<Ride> {
+    const { data, error } = await supabase
+      .from('rides')
+      .select('*')
+      .eq('id', rideId)
+      .single();
+
+    if (error) throw error;
+    return data;
+  }
+
+  static subscribeToDriverLocation(driverId: string, callback: (location: { lat: number; lng: number }) => void) {
+    return supabase
+      .channel(`driver-location-${driverId}`)
+      .on(
+        'broadcast',
+        { event: 'driver_location_update' },
+        (payload) => callback(payload.location)
+      )
+      .subscribe();
   }
 }

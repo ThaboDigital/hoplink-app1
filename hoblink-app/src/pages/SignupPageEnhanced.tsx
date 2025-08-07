@@ -12,7 +12,7 @@ const SignupPage: React.FC = () => {
     phone: '',
     password: '',
     confirmPassword: '',
-    userType: 'user' as 'user' | 'driver'
+    userType: 'rider' as 'rider' | 'driver'
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -172,15 +172,15 @@ const SignupPage: React.FC = () => {
         <div className="absolute top-2/3 right-1/2 w-3 h-3 bg-blue-200 rounded-full animate-bounce"></div>
       </div>
 
-      <div className="flex items-center justify-center min-h-[calc(100vh-5rem)] p-4">
-        <div className={`w-full max-w-md transition-all duration-1000 transform ${
+      <div className="flex items-center justify-center min-h-[calc(100vh-5rem)] p-4 sm:p-6">
+        <div className={`w-full max-w-md mx-auto transition-all duration-1000 transform ${
           isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'
         }`}>
           {/* Glassmorphism Signup Card */}
-          <div className="backdrop-blur-lg bg-white/30 dark:bg-gray-800/30 rounded-3xl p-8 shadow-2xl border border-white/20 dark:border-gray-700/20">
+          <div className="backdrop-blur-lg bg-white/30 dark:bg-gray-800/30 rounded-3xl p-6 sm:p-8 shadow-2xl border border-white/20 dark:border-gray-700/20">
             {/* Logo */}
             <div className="text-center mb-8">
-              <HobLinkLogo variant="vertical" size="xl" />
+              <HobLinkLogo variant="vertical" size="2xl" />
               <h1 className="text-3xl font-bold text-gray-800 dark:text-white mt-4 mb-2">
                 Join HobLink
               </h1>
@@ -199,7 +199,7 @@ const SignupPage: React.FC = () => {
             {/* Signup Form */}
             <form onSubmit={handleSubmit} className="space-y-4">
               {/* Name Fields */}
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="space-y-1">
                   <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                     First Name
@@ -321,12 +321,12 @@ const SignupPage: React.FC = () => {
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                   I want to join as:
                 </label>
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <button
                     type="button"
-                    onClick={() => setFormData(prev => ({ ...prev, userType: 'user' }))}
+                    onClick={() => setFormData(prev => ({ ...prev, userType: 'rider' }))}
                     className={`px-3 py-2 rounded-xl border transition-all duration-300 text-sm ${
-                      formData.userType === 'user'
+                      formData.userType === 'rider'
                         ? 'bg-green-500 text-white border-green-500 shadow-lg'
                         : 'backdrop-blur-md bg-white/30 dark:bg-gray-800/30 border-white/30 dark:border-gray-700/30 text-gray-700 dark:text-gray-300 hover:bg-white/40 dark:hover:bg-gray-800/40'
                     }`}

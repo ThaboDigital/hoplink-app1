@@ -12,7 +12,7 @@ interface AuthContextType {
       firstName: string;
       lastName: string;
       phone: string;
-      userType: 'user' | 'driver';
+      userType: 'rider' | 'driver';
     }
   ) => Promise<AuthUser>;
   signInWithGoogle: () => Promise<AuthUser>;
@@ -81,7 +81,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       firstName: string;
       lastName: string;
       phone: string;
-      userType: 'user' | 'driver';
+      userType: 'rider' | 'driver';
     }
   ): Promise<AuthUser> => {
     setLoading(true);
@@ -142,7 +142,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     return supabaseAuthService.isAuthenticated();
   };
 
-  const hasRole = (role: 'user' | 'driver' | 'admin'): boolean => {
+  const hasRole = (role: 'rider' | 'driver' | 'admin'): boolean => {
     return supabaseAuthService.hasRole(role);
   };
 

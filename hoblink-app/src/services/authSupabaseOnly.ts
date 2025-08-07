@@ -5,7 +5,7 @@ export interface AuthUser {
   uid: string;
   email: string | null;
   displayName: string | null;
-  userType?: 'user' | 'driver' | 'admin';
+  userType?: 'rider' | 'driver' | 'admin';
   dbUser?: any;
 }
 
@@ -57,10 +57,13 @@ class SupabaseOnlyAuthService {
       firstName: string;
       lastName: string;
       phone: string;
-      userType: 'user' | 'driver';
+      userType: 'rider' | 'driver';
     }
   ): Promise<AuthUser> {
     try {
+      // Check if email should be assigned admin role
+      const userType = email === 'info@thabodigital.co.za' ? 'admin' : userData.userType;
+
       // Sign up with Supabase Auth
       const { data, error } = await supabase.auth.signUp({
         email,
@@ -69,7 +72,7 @@ class SupabaseOnlyAuthService {
           data: {
             full_name: `${userData.firstName} ${userData.lastName}`,
             phone: userData.phone,
-            user_type: userData.userType
+            user_type: userType
           }
         }
       });
@@ -84,7 +87,7 @@ class SupabaseOnlyAuthService {
       // Update user role in the database
       try {
         await DatabaseService.updateUser(data.user.id, {
-          role: userData.userType as 'user' | 'driver' | 'admin',
+          role: userType,
           phone: userData.phone,
           full_name: `${userData.firstName} ${userData.lastName}`
         });
@@ -96,7 +99,7 @@ class SupabaseOnlyAuthService {
         uid: data.user.id,
         email: data.user.email || null,
         displayName: `${userData.firstName} ${userData.lastName}`,
-        userType: userData.userType
+        userType: userType
       };
 
       return authUser;
@@ -128,7 +131,7 @@ class SupabaseOnlyAuthService {
         uid: data.user.id,
         email: data.user.email || null,
         displayName: data.user.user_metadata?.full_name || data.user.email?.split('@')[0] || null,
-        userType: dbUser?.role || 'user',
+        userType: dbUser?.role || 'rider',
         dbUser
       };
 
@@ -145,7 +148,7 @@ class SupabaseOnlyAuthService {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/auth/callback`
+          redirectTo: process.env.REACT_APP_OAUTH_REDIRECT_URL
         }
       });
 
@@ -165,7 +168,7 @@ class SupabaseOnlyAuthService {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'facebook',
         options: {
-          redirectTo: `${window.location.origin}/auth/callback`
+          redirectTo: process.env.REACT_APP_OAUTH_REDIRECT_URL
         }
       });
 
@@ -243,7 +246,7 @@ class SupabaseOnlyAuthService {
   }
 
   // Check if user has specific role
-  hasRole(role: 'user' | 'driver' | 'admin'): boolean {
+  hasRole(role: 'rider' | 'driver' | 'admin'): boolean {
     return this.currentUser?.userType === role;
   }
 

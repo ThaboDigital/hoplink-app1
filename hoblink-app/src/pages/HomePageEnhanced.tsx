@@ -41,7 +41,7 @@ const HomePage: React.FC = () => {
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between h-20">
             <div className="flex items-center space-x-4">
-              <HobLinkLogo variant="horizontal" size="2xl" />
+              <HobLinkLogo variant="horizontal" size="3xl" />
             </div>
             <nav className="hidden md:flex items-center space-x-8">
               <Link to="/" className="text-gray-700 dark:text-gray-300 hover:text-green-600 dark:hover:text-green-400 font-medium transition-colors">
@@ -173,7 +173,7 @@ const HomePage: React.FC = () => {
                 {['Polokwane', 'Giyani', 'Phalaborwa', 'Burgersfort', 'Sekhukhune'].map((city, index) => (
                   <div key={city} className="flex items-center justify-between p-3 bg-white/30 dark:bg-gray-800/30 rounded-lg backdrop-blur-sm">
                     <span className="font-medium text-gray-700 dark:text-gray-300">🏙️ {city}</span>
-                    <span className="px-3 py-1 bg-gradient-to-r from-orange-400 to-yellow-500 text-white text-xs font-bold rounded-full shadow-sm animate-pulse">
+                    <span className="px-3 py-1 bg-gradient-to-r from-green-400 to-emerald-500 text-white text-xs font-bold rounded-full shadow-sm animate-pulse">
                       Coming Soon
                     </span>
                   </div>
@@ -248,7 +248,7 @@ const HomePage: React.FC = () => {
         <div className="container mx-auto max-w-6xl">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div>
-              <HobLinkLogo variant="horizontal" size="lg" />
+              <HobLinkLogo variant="horizontal" size="xl" />
               <p className="mt-4 text-gray-400">
                 Safe, Simple Rides — Wherever You Are.
               </p>
@@ -279,16 +279,18 @@ const HomePage: React.FC = () => {
       </footer>
 
       {/* Custom CSS for animations */}
-      <style jsx>{`
-        @keyframes moveRight {
-          0% {
-            transform: translateX(-100px) translateY(-50%);
+      <style>
+        {`
+          @keyframes moveRight {
+            0% {
+              transform: translateX(-100px) translateY(-50%);
+            }
+            100% {
+              transform: translateX(calc(100vw + 100px)) translateY(-50%);
+            }
           }
-          100% {
-            transform: translateX(calc(100vw + 100px)) translateY(-50%);
-          }
-        }
-      `}</style>
+        `}
+      </style>
     </div>
   );
 };

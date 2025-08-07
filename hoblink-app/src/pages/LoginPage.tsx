@@ -3,6 +3,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import HobLinkLogo from '../components/HobLinkLogo';
 import ThemeToggle from '../components/ThemeToggle';
+import LoadingSpinner from '../components/LoadingSpinner';
 
 const LoginPage: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -45,18 +46,14 @@ const LoginPage: React.FC = () => {
     setLoading(true);
 
     try {
-      const user = await signInWithGoogle();
-      
-      // Redirect based on user type or intended destination
-      if (user.userType === 'driver') {
-        navigate('/driver');
-      } else if (user.userType === 'admin') {
-        navigate('/admin');
-      } else {
-        navigate(from);
-      }
+      // Store the intended destination
+      localStorage.setItem('auth_redirect', from);
+      await signInWithGoogle();
+      // Redirect will be handled by the callback component
     } catch (error: any) {
-      setError(error.message);
+      if (!error.message.includes('Redirect')) {
+        setError(error.message);
+      }
     } finally {
       setLoading(false);
     }
@@ -67,18 +64,14 @@ const LoginPage: React.FC = () => {
     setLoading(true);
 
     try {
-      const user = await signInWithFacebook();
-      
-      // Redirect based on user type or intended destination
-      if (user.userType === 'driver') {
-        navigate('/driver');
-      } else if (user.userType === 'admin') {
-        navigate('/admin');
-      } else {
-        navigate(from);
-      }
+      // Store the intended destination
+      localStorage.setItem('auth_redirect', from);
+      await signInWithFacebook();
+      // Redirect will be handled by the callback component
     } catch (error: any) {
-      setError(error.message);
+      if (!error.message.includes('Redirect')) {
+        setError(error.message);
+      }
     } finally {
       setLoading(false);
     }
@@ -89,11 +82,27 @@ const LoginPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col justify-center py-12 sm:px-6 lg:px-8 transition-colors duration-200">
-      <div className="sm:mx-auto sm:w-full sm:max-w-md">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col py-4 sm:py-12 px-4 sm:px-6 lg:px-8 transition-colors duration-200">
+      {/* Top Navigation */}
+      <nav className="fixed top-0 left-0 right-0 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md z-50 border-b border-gray-200/20 dark:border-gray-700/20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16">
+            <Link to="/" className="flex items-center">
+              <HobLinkLogo variant="horizontal" size="lg" className="sm:hidden" />
+              <HobLinkLogo variant="horizontal" size="2xl" className="hidden sm:block" />
+            </Link>
+            <div className="flex items-center space-x-4">
+              <ThemeToggle />
+            </div>
+          </div>
+        </div>
+      </nav>
+
+      <div className="flex-grow flex items-center justify-center pt-16 sm:pt-0">
+      <div className="w-full sm:mx-auto sm:w-full sm:max-w-md">
         {/* Logo */}
         <div className="flex justify-center">
-          <HobLinkLogo variant="vertical" size="xl" />
+          <HobLinkLogo variant="vertical" size="2xl" />
         </div>
         <h2 className="mt-6 text-center text-3xl font-bold text-gray-900 dark:text-white">
           Welcome back
@@ -104,7 +113,10 @@ const LoginPage: React.FC = () => {
       </div>
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="bg-white dark:bg-gray-800 py-8 px-4 shadow sm:rounded-lg sm:px-10 transition-colors duration-200">
+        <div className="backdrop-blur-xl bg-white/90 dark:bg-gray-800/90 py-8 px-4 shadow-xl sm:rounded-lg sm:px-10 transition-all duration-300 hover:shadow-green-500/10 dark:hover:shadow-emerald-400/10 border border-white/20 dark:border-gray-700/20">
+            {/* Decorative elements */}
+            <div className="absolute inset-0 rounded-lg bg-gradient-to-br from-green-500/5 via-transparent to-emerald-500/5 dark:from-green-400/5 dark:to-emerald-400/5 opacity-30 pointer-events-none"></div>
+            <div className="relative">
           {/* User Type Toggle */}
           <div className="mb-6">
             <div className="flex rounded-lg bg-gray-100 dark:bg-gray-700 p-1">
@@ -256,7 +268,9 @@ const LoginPage: React.FC = () => {
             </div>
           </div>
         </div>
+        </div>
       </div>
+    </div>
     </div>
   );
 };
